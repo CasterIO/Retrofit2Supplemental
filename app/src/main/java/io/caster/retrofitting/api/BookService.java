@@ -4,11 +4,11 @@ package io.caster.retrofitting.api;
 import java.util.List;
 
 import io.caster.retrofitting.models.Book;
-import retrofit2.Call;
 import retrofit2.http.GET;
+import rx.Observable;
 
 public interface BookService {
 
     @GET("books")
-    Call<List<Book>> getBooks();
+    Observable<List<Book>> getBooks();
 }

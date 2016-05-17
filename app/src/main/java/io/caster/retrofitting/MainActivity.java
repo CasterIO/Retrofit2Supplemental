@@ -9,14 +9,16 @@ import javax.inject.Inject;
 
 import io.caster.retrofitting.api.BookService;
 import io.caster.retrofitting.models.Book;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
     @Inject BookService bookService;
+    private Subscription subscription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,17 +27,34 @@ public class MainActivity extends AppCompatActivity {
 
         ((DemoApplication) getApplication()).getAppComponent().inject(this);
 
-        bookService.getBooks().enqueue(new Callback<List<Book>>() {
-            @Override
-            public void onResponse(Call<List<Book>> call, Response<List<Book>> response) {
-                Timber.d("Got some books back!");
-            }
+        subscription =
+                bookService.getBooks()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Subscriber<List<Book>>() {
+                            @Override
+                            public void onCompleted() {
+                                Timber.d("Complete.");
+                            }
 
-            @Override
-            public void onFailure(Call<List<Book>> call, Throwable t) {
-                Timber.e(t, "Failed to get books!");
-            }
-        });
+                            @Override
+                            public void onError(Throwable e) {
+                                Timber.e(e, "Error during book retrieval.");
+                            }
 
+                            @Override
+                            public void onNext(List<Book> books) {
+                                Timber.d("Number of books: %s", books.size());
+                            }
+                        });
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (subscription != null && !subscription.isUnsubscribed()) {
+            subscription.unsubscribe();
+        }
     }
 }

@@ -27,6 +27,8 @@ ext {
     retrofitVersion = '2.0.2'
     daggerVersion = '2.2'
     timberVersion = '4.1.2'
+    rxJavaVersion = '1.1.5'
+    rxAndroidVersion = '1.2.0'
 }
 
 dependencies {
@@ -54,5 +56,14 @@ dependencies {
     compile "com.google.dagger:dagger:$daggerVersion"
     provided 'javax.annotation:jsr250-api:1.0'
 
+
+    // RxJava
+    compile "io.reactivex:rxandroid:$rxAndroidVersion"
+    // Because RxAndroid releases are few and far between, it is recommended you also
+    // explicitly depend on RxJava's latest version for bug fixes and new features.
+    compile "io.reactivex:rxjava:$rxJavaVersion"
+
+    // Retrofit RxJava
+    compile "com.squareup.retrofit2:adapter-rxjava:$retrofitVersion"
 
 }
